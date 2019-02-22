@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -23,11 +24,11 @@ public class EchoServer {
 	}
 
 	public void start() throws Exception {
-		NioEventLoopGroup group = new NioEventLoopGroup();
-		NioEventLoopGroup boosGroup = new NioEventLoopGroup();
+		EventLoopGroup bossGroup = new NioEventLoopGroup();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {
 			ServerBootstrap b = new ServerBootstrap();
-			b.group(group, boosGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
+			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
 					.childHandler(new ChannelInitializer<SocketChannel>() {
 						@Override
 						protected void initChannel(SocketChannel ch) throws Exception {
@@ -40,8 +41,8 @@ public class EchoServer {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
-			group.shutdownGracefully().sync();
-			boosGroup.shutdownGracefully().sync();
+			bossGroup.shutdownGracefully().sync();
+			workerGroup.shutdownGracefully().sync();
 		}
 
 	}
